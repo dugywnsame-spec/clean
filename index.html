@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>우리 반 청소 미션</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#f3f5f1;--paper:#fff;--ink:#1f2a24;--muted:#5d6b62;--line:#d9e0da;
+  --board:#2f4a3c;--board-ink:#eef3ea;--chalk:#f2d36b;--accent:#2f7a55;--done-bg:#e6f2ea;--warn:#b5532f;
+  --font-display:"Do Hyeon","Noto Sans KR",sans-serif;
+  --font-body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --font-hand:"Gowun Dodum","Noto Sans KR",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#141a16;--paper:#1c2420;--ink:#e6ece7;--muted:#a3b0a7;--line:#2e3a33;
+  --board:#24392e;--accent:#6cc497;--done-bg:#1f3428;--warn:#e08a66;color-scheme:dark;}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6}
+.wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+
+.board{background:var(--board);color:var(--board-ink);border-bottom:10px solid #8a6a45}
+.board .wrap{padding-block:32px 26px}
+.top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--font-hand);font-size:15px;opacity:.85}
+.live{display:inline-flex;align-items:center;gap:6px}
+.live i{width:9px;height:9px;border-radius:50%;background:#999;display:inline-block}
+.live.on i{background:#6fdc9a;box-shadow:0 0 0 3px rgba(111,220,154,.25)}
+.board h1{font-family:var(--font-display);font-weight:400;font-size:clamp(38px,9vw,56px);line-height:1.1;margin:6px 0 10px}
+.board h1 em{font-style:normal;color:var(--chalk)}
+.board p{font-family:var(--font-hand);font-size:17px;margin:0}
+
+.namebox{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:22px 0 6px}
+.namebox label{font-weight:700}
+.namebox input{flex:1;min-width:0;max-width:220px;font:inherit;padding:8px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink)}
+.namebox input:focus-visible{outline:3px solid var(--chalk);border-color:var(--accent)}
+
+.progress{display:flex;align-items:center;gap:14px;margin:18px 0 18px}
+.bar{flex:1;height:12px;background:var(--line);border-radius:6px;overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:var(--accent);transition:width .35s}
+.count{font-family:var(--font-display);font-size:22px;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.missions{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.mission{background:var(--paper);border:1.5px solid var(--line);border-radius:14px;display:grid;grid-template-columns:auto 1fr;gap:16px;padding:18px;animation:in .25s ease}
+.mission.leaving{animation:out .35s ease forwards}
+@keyframes in{from{opacity:0;transform:translateY(6px)}}
+@keyframes out{to{opacity:0;transform:scale(.96)}}
+.num{font-family:var(--font-display);font-size:28px;line-height:1;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--board);color:var(--chalk)}
+.body{min-width:0}
+.where{display:inline-block;font-size:13px;font-weight:500;color:var(--accent);border:1px solid currentColor;border-radius:999px;padding:1px 10px;margin-bottom:6px}
+.body h2{font-family:var(--font-display);font-weight:400;font-size:24px;line-height:1.25;margin:2px 0 6px}
+.body ul{margin:0 0 12px;padding-left:1.1em}
+.body li b{color:var(--accent)}
+.btn{font:inherit;font-weight:700;border:none;border-radius:10px;padding:10px 18px;cursor:pointer;background:var(--accent);color:var(--paper)}
+.btn:focus-visible{outline:3px solid var(--chalk);outline-offset:2px}
+.btn:disabled{opacity:.5;cursor:default}
+
+.empty{display:none;text-align:center;padding:28px 18px;border-radius:14px;background:var(--board);color:var(--board-ink)}
+.empty strong{display:block;font-family:var(--font-display);font-weight:400;font-size:32px;color:var(--chalk)}
+.empty span{font-family:var(--font-hand);font-size:17px}
+body.clear .empty{display:block}
+
+.donelist{margin:30px 0 10px}
+.donelist h3{font-family:var(--font-display);font-weight:400;font-size:22px;margin:0 0 8px}
+.donelist ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.donelist li{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--done-bg);border-radius:10px;padding:10px 14px}
+.donelist .t{flex:1;min-width:0;text-decoration:line-through;text-decoration-color:var(--accent)}
+.donelist .who{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.undo{font:inherit;font-size:14px;background:none;border:1px solid var(--muted);color:var(--muted);border-radius:8px;padding:3px 10px;cursor:pointer}
+.nothing{color:var(--muted);font-size:14px}
+
+.notice{margin:16px 0;padding:12px 14px;border-radius:10px;border:1.5px solid var(--warn);color:var(--warn);font-size:14px}
+.final{margin:26px 0 40px;padding:16px 18px;border-radius:14px;border:2px dashed var(--line);font-family:var(--font-hand)}
+@media (max-width:440px){.mission{padding:16px;gap:12px}.num{width:38px;height:38px;font-size:24px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="board">
+  <div class="wrap">
+    <div class="top"><span id="today">오늘의 청소</span><span class="live" id="live"><i></i><span>연결 중…</span></span></div>
+    <h1>우리 반 <em>청소 미션</em> 5</h1>
+    <p>끝낸 미션은 "완료"를 누르면 모두의 화면에서 사라져요. 남은 미션만 보고 달려!</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="notice" class="notice" hidden></div>
+
+  <div class="namebox">
+    <label for="name">내 이름</label>
+    <input id="name" maxlength="10" placeholder="예) 김민준" autocomplete="off">
+  </div>
+
+  <div class="progress">
+    <div class="bar" aria-hidden="true"><span id="bar"></span></div>
+    <div class="count" aria-live="polite"><span id="doneCount">0</span> / 5 완료</div>
+  </div>
+
+  <ol class="missions" id="missions"></ol>
+
+  <div class="empty" role="status">
+    <strong>미션 5개 클리어!</strong>
+    <span>수고했어요. 선생님께 확인받고 자리로!</span>
+  </div>
+
+  <section class="donelist">
+    <h3>끝난 미션</h3>
+    <ul id="doneList"></ul>
+    <p class="nothing" id="nothing">아직 끝난 미션이 없어요.</p>
+  </section>
+
+  <div class="final">잘못 눌렀으면 "되돌리기"를 누르면 다시 목록에 나타나요. 다음 날이 되면 미션판은 자동으로 새로 시작돼요.</div>
+</main>
+
+<!-- Firebase (compat 버전) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+/* ▼▼▼ 파이어베이스 콘솔에서 복사한 설정값으로 바꿔 넣기 ▼▼▼ */
+const firebaseConfig = {
+  apiKey: "여기에_apiKey",
+  authDomain: "여기에_authDomain",
+  databaseURL: "여기에_databaseURL",
+  projectId: "여기에_projectId",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: "여기에_appId"
+};
+/* ▲▲▲ 여기까지 ▲▲▲ */
+
+const MISSIONS = [
+  {id:"m1", where:"1분단 · 2분단 · 3분단", title:"바닥 쓸고 닦기",
+   items:["빗자루로 먼저 쓸고, 그다음 <b>걸레로 꼼꼼히</b> 닦기","바닥 <b>얼룩</b>은 보이는 대로 문질러서 지우기","책상 다리 사이, 구석까지 놓치지 말기"]},
+  {id:"m2", where:"긴 다리 책상 3개", title:"책상 위 깨끗이 비우기",
+   items:["3개 모두 위에 <b>아무것도 올려두지 않기</b>","올려져 있던 물건은 주인에게 돌려주거나 <b>버리기</b>"]},
+  {id:"m3", where:"칠판 · 뒷게시판", title:"칠판 부착물 정리",
+   items:["칠판에 붙은 종이 중 <b>버릴 것은 버리기</b>","남길 것은 <b>뒷게시판에 반듯하게</b> 옮겨 붙이기","삐뚤어지거나 겹치지 않게, 보기 좋게!"]},
+  {id:"m4", where:"교실 전체", title:"책상 줄 맞추기",
+   items:["앞뒤·좌우 줄이 <b>일직선</b>이 되도록 맞추기","의자는 책상 안쪽으로 쏙 넣기"]},
+  {id:"m5", where:"칠판", title:"칠판 광내기",
+   items:["분필 자국 없이 <b>반짝반짝 광나게</b> 닦기","분필 받침대 가루까지 털어내면 완벽"]}
+];
+
+// 날짜(한국 시간) 기준으로 매일 새 미션판
+const d = new Date(Date.now() + 9*3600*1000);
+const DAY = d.toISOString().slice(0,10);
+document.getElementById("today").textContent =
+  `${d.getUTCMonth()+1}월 ${d.getUTCDate()}일 청소`;
+
+const $ = id => document.getElementById(id);
+const nameInput = $("name");
+try { nameInput.value = localStorage.getItem("clean-name") || ""; } catch(e){}
+nameInput.addEventListener("input", () => { try{localStorage.setItem("clean-name", nameInput.value.trim());}catch(e){} });
+
+let state = {};      // { m1: {by, at}, ... }
+let ref = null;      // 파이어베이스 경로
+let demo = false;    // 설정 전에는 혼자 보는 연습 모드
+
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+function render(){
+  const list = $("missions");
+  const remain = MISSIONS.filter(m => !state[m.id]);
+  // 사라진 카드는 살짝 애니메이션 후 제거
+  [...list.children].forEach(li => {
+    if (state[li.dataset.id] && !li.classList.contains("leaving")) {
+      li.classList.add("leaving");
+      setTimeout(() => li.remove(), 340);
+    }
+  });
+  remain.forEach((m, i) => {
+    if (list.querySelector(`[data-id="${m.id}"]:not(.leaving)`)) return;
+    const li = document.createElement("li");
+    li.className = "mission"; li.dataset.id = m.id;
+    li.innerHTML = `<div class="num">${m.id.slice(1)}</div>
+      <div class="body"><span class="where">${m.where}</span><h2>${m.title}</h2>
+      <ul>${m.items.map(x=>`<li>${x}</li>`).join("")}</ul>
+      <button class="btn" type="button">완료!</button></div>`;
+    li.querySelector("button").addEventListener("click", e => complete(m.id, e.currentTarget));
+    // 원래 순서 자리에 끼워 넣기
+    const next = [...list.children].find(c => c.dataset.id > m.id && !c.classList.contains("leaving"));
+    list.insertBefore(li, next || null);
+  });
+
+  const done = MISSIONS.filter(m => state[m.id]);
+  $("doneCount").textContent = done.length;
+  $("bar").style.width = (done.length / MISSIONS.length * 100) + "%";
+  document.body.classList.toggle("clear", done.length === MISSIONS.length);
+
+  $("nothing").hidden = done.length > 0;
+  $("doneList").innerHTML = done.map(m => {
+    const s = state[m.id];
+    const t = s.at ? new Date(s.at).toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"}) : "";
+    return `<li><span class="t">${m.id.slice(1)}. ${m.title}</span>
+      <span class="who">${esc(s.by || "누군가")} · ${t}</span>
+      <button class="undo" type="button" data-id="${m.id}">되돌리기</button></li>`;
+  }).join("");
+  $("doneList").querySelectorAll(".undo").forEach(b => b.addEventListener("click", () => undo(b.dataset.id)));
+}
+
+function complete(id, btn){
+  const who = nameInput.value.trim();
+  if (!who) { nameInput.focus(); nameInput.placeholder = "이름부터 적어주세요!"; return; }
+  btn.disabled = true;
+  if (demo) { state[id] = {by: who, at: Date.now()}; render(); return; }
+  ref.child(id).set({by: who.slice(0,10), at: firebase.database.ServerValue.TIMESTAMP})
+    .catch(() => { btn.disabled = false; showNotice("저장이 안 됐어요. 인터넷 연결을 확인하고 다시 눌러주세요."); });
+}
+
+function undo(id){
+  if (demo) { delete state[id]; render(); return; }
+  ref.child(id).remove().catch(() => showNotice("되돌리기가 안 됐어요. 다시 눌러주세요."));
+}
+
+function showNotice(msg){ const n = $("notice"); n.textContent = msg; n.hidden = false; }
+
+// 연결
+if (!firebaseConfig.databaseURL || firebaseConfig.databaseURL.startsWith("여기에")) {
+  demo = true;
+  showNotice("아직 파이어베이스 설정 전이라 연습 모드예요. 지금 누르는 건 이 화면에만 반영돼요.");
+  $("live").querySelector("span").textContent = "연습 모드";
+  render();
+} else {
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  ref = db.ref("cleaning/days/" + DAY);
+  db.ref(".info/connected").on("value", s => {
+    const on = s.val() === true;
+    $("live").classList.toggle("on", on);
+    $("live").querySelector("span").textContent = on ? "실시간 연결됨" : "연결 끊김";
+  });
+  ref.on("value", snap => { state = snap.val() || {}; render(); },
+    () => showNotice("미션판을 불러오지 못했어요. 데이터베이스 규칙을 확인해주세요."));
+  render();
+}
+</script>
+</body>
+</html>
